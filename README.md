@@ -14,30 +14,27 @@ $ npm install flow-max
 ## Examples
 
 ``` javascript
-var // Flow max stream generator:
+var eventStream = require( 'eventStream' ),
 	mStream = require( 'flow-max' );
 
-var data = new Array( 1000 ),
-	stream;
-
 // Create some data...
-for ( var i = 0; i < 1000; i++ ) {
+var data = new Array( 1000 );
+for ( var i = 0; i < data.length; i++ ) {
 	data[ i ] = Math.random();
 }
 
-// Create a new stream:
-stream = mStream().stream();
+// Create a readable stream:
+var readStream = eventStream.readArray( data );
 
-// Add a listener:
-stream.on( 'data', function( max ) {
-	console.log( 'Max: ' + max );
-});
+// Create a new max stream:
+var stream = mStream().stream();
 
-// Write the data to the stream...
-for ( var j = 0; j < data.length; j++ ) {
-	stream.write( data[ j ] );
-}
-stream.end();
+// Create a pipeline:
+readStream.pipe( stream )
+	.pipe( eventStream.map( function( d, clbk ) {
+		clbk( null, d.toString() );
+	}))
+	.pipe( process.stdout );
 ```
 
 ## Tests
